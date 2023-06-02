@@ -1,0 +1,96 @@
+<meta charset="UTF-8">
+<!DOCTYPE html>
+<html>
+<head>
+  <title>自由落下シミュレーション</title>
+  <style>
+    canvas {
+      border: 1px solid black;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>自由落下シミュレーション</h1>
+  <p>空気抵抗を考慮しない自由落下のシミュレーションです。</p>
+
+  <label for="initialVelocity">初速度 (m/s):</label>
+  <input type="number" id="initialVelocity" min="0" step="0.1" value="0"><br>
+
+  <label for="gravity">重力加速度 (m/s²):</label>
+  <input type="number" id="gravity" min="0" step="0.1" value="9.8"><br>
+
+  <button onclick="startSimulation()">スタート</button>
+  <button onclick="resetSimulation()">リセット</button><br>
+
+  <div style="display: flex;">
+    <canvas id="canvas" width="400" height="400"></canvas>
+    <canvas id="graph" width="400" height="400"></canvas>
+  </div>
+
+  <script>
+    // シミュレーションの設定
+    var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
+    var graph = document.getElementById("graph");
+    var graphCtx = graph.getContext("2d");
+
+    var initialVelocityInput = document.getElementById("initialVelocity");
+    var gravityInput = document.getElementById("gravity");
+
+    var time = 0; // シミュレーションの経過時間
+    var dt = 0.01; // シミュレーションの時間刻み
+    var tMax = 10; // シミュレーションの最大時間
+
+    var isSimulationRunning = false; // シミュレーションが実行中かどうか
+
+    // シミュレーションをリセット
+    function resetSimulation() {
+      isSimulationRunning = false;
+      time = 0;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      graphCtx.clearRect(0, 0, graph.width, graph.height);
+    }
+
+    // シミュレーションを開始
+    function startSimulation() {
+      resetSimulation();
+
+      var initialVelocity = parseFloat(initialVelocityInput.value);
+      var gravity = parseFloat(gravityInput.value);
+
+      isSimulationRunning = true;
+
+      // シミュレーションの描画
+      function drawSimulation() {
+        if (!isSimulationRunning) {
+          return;
+        }
+
+        var position = initialVelocity * time - 0.5 * gravity * time * time;
+        var velocity = initialVelocity - gravity * time;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.beginPath();
+        ctx.arc(200, 200 - position * 10, 10, 0, 2 * Math.PI);
+        ctx.fill();
+
+        graphCtx.clearRect(0, 0, graph.width, graph.height);
+        graphCtx.fillStyle = "black";
+        graphCtx.fillRect(time * 40, graph.height - velocity * 10, 2, 2);
+
+        time += dt;
+
+        if (time < tMax) {
+          requestAnimationFrame(drawSimulation);
+        } else {
+          isSimulationRunning = false;
+        }
+      }
+
+      drawSimulation();
+    }
+  </script>
+</body>
+</html>
